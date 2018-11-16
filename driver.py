@@ -1,10 +1,6 @@
-from media_player import Media_Player
-import os
+from player_gui import Player_GUI
 
 def __main__():
-    player = Media_Player()
-    cwd = os.getcwd()
-    player.play_MP4(cwd + '/small.mp4')
-
+    interface = Player_GUI()
 
 __main__()
