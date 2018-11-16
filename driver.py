@@ -1,6 +1,6 @@
 from player_gui import Player_GUI
 
-def __main__():
+def main():
     Player_GUI()
 
-__main__()
+main()
