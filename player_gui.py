@@ -11,12 +11,13 @@ class View_Tree(object):
 
         # Create the file viewer
         self.tree = ttk.Treeview(tab, columns=("Root", "Files", "Type"))
-        self.tree['show'] = 'headings'
 
         # Create headers
         self.tree.heading("Files", text="Contents")
         self.tree.heading("Type", text="Type")
+        self.tree.column("#0", width=240, stretch=0)
         self.tree.column('#1', stretch=NO, minwidth=0, width=0)
+        self.tree.column('#3', stretch=NO, minwidth=120, width=120)
 
         # Set event callback for double click
         self.tree.bind("<Double-1>", self.tree_double_click_callback)
@@ -30,8 +31,13 @@ class View_Tree(object):
             # Determine file type
             f_type = self.determine_file_type(content)
             # Insert all contents
-            content_str = '"{}" "{}" {}'.format(content[0] + '\\', content[1], f_type)
-            self.tree.insert(element, 'end', text=content[0] + '\\' + content[1],
+            insert = content[0]
+            if element == '':
+                insert += '\\'
+
+            content_str = '"{}" "{}" {}'.format(insert, content[1], f_type)
+
+            self.tree.insert(element, 'end', text=content[0],
                              values=content_str)
 
     def tree_double_click_callback(self, event):
@@ -44,7 +50,6 @@ class View_Tree(object):
         item = selection[0]
         item_vals = self.tree.item(item, "value")
         item_text = self.tree.item(item, "text")
-        #print item_text
 
         # If it's a directory
         if item_vals[2] == 'Directory':
@@ -53,7 +58,7 @@ class View_Tree(object):
             if len(children) > 0:
                 self.tree.delete(children)
 
-            new_path = item_text + "\\"
+            new_path = item_text + "\\" + item_vals[1]
 
             # Get contents of the drive referred to by the tab
             contents = drive_manager.get_path_contents(new_path, 'All')
