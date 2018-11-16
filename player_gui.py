@@ -3,6 +3,82 @@ import ttk
 from drive_manager import Drive_Manager
 from collections import OrderedDict
 
+class View_Tree(object):
+    ''' Hierarchy viewer for the GUI '''
+
+    def __init__(self, tab):
+        '''@tab - the tab to attach the view to '''
+
+        # Create the file viewer
+        self.tree = ttk.Treeview(tab, columns=("Root", "Files", "Type"))
+        self.tree['show'] = 'headings'
+
+        # Create headers
+        self.tree.heading("Files", text="Contents")
+        self.tree.heading("Type", text="Type")
+        self.tree.column('#1', stretch=NO, minwidth=0, width=0)
+
+        # Set event callback for double click
+        self.tree.bind("<Double-1>", self.tree_double_click_callback)
+
+    def populate_tree(self, contents, element=''):
+        ''' Populate the file viewer
+            @element - The tree or tree element to attach to
+            @contents - A list of contents to populate the viewer with '''
+
+        for content in contents:
+            # Determine file type
+            f_type = self.determine_file_type(content)
+            # Insert all contents
+            content_str = '"{}" "{}" {}'.format(content[0] + '\\', content[1], f_type)
+            self.tree.insert(element, 'end', text=content[0] + '\\' + content[1],
+                             values=content_str)
+
+    def tree_double_click_callback(self, event):
+        ''' Callback to run when a treeview button is clicked '''
+
+        drive_manager = Drive_Manager()
+
+        # Get ID of selection
+        selection = self.tree.selection()
+        item = selection[0]
+        item_vals = self.tree.item(item, "value")
+        item_text = self.tree.item(item, "text")
+        #print item_text
+
+        # If it's a directory
+        if item_vals[2] == 'Directory':
+            # Delete children if they exist
+            children = self.tree.get_children(item)
+            if len(children) > 0:
+                self.tree.delete(children)
+
+            new_path = item_text + "\\"
+
+            # Get contents of the drive referred to by the tab
+            contents = drive_manager.get_path_contents(new_path, 'All')
+
+            self.populate_tree(contents, item)
+
+        # TODO - Otherwise play the video
+        elif item_vals[2] == 'File':
+            print "Playing " + item_vals[0] + item_vals[1]
+
+    def determine_file_type(self, file):
+        ''' Determine and return the file type
+            @file - a (root, name, type) 3-tuple '''
+
+        # TODO - Check for image and video extensions
+
+        if file[2] == 'd':
+            return "Directory"
+        elif file[2] == 'f':
+            return "File"
+        else:
+            return "Unknown"
+
+    def show(self):
+        self.tree.pack(fill=BOTH, expand=1)
 
 class Player_GUI(object):
     ''' Media player GUI '''
@@ -72,20 +148,17 @@ class Player_GUI(object):
         # Instantiate the drive manager
         drive_manager = Drive_Manager()
 
+        # Create a tree
+        tree = View_Tree(tab[1])
+
         # Get contents of the drive referred to by the tab
         contents = drive_manager.get_path_contents(tab[0], 'All')
 
-        # Create the file viewer
-        tree = ttk.Treeview(tab[1], columns=("Files", "Type"))
-        tree['show'] = 'headings'
-        tree.heading("Files", text="Contents")
-        tree.heading("Type", text="Type")
-        tree.pack(fill=BOTH, expand=1)
+        # Populate the tree
+        tree.populate_tree(contents)
 
-        for content in enumerate(contents):
-            item_text = 'item_' + str(content[0])
-            f_type = self.determine_file_type(content[1])
-            tree.insert('', 'end', text=item_text, values=('"{}" {}'.format(content[1][1], f_type)))
+        # Place the file viewer
+        tree.show()
 
     def tab_changed_callback(self, event):
         ''' Callback to run when a tab is changed '''
@@ -101,17 +174,4 @@ class Player_GUI(object):
 
         # Populate the tab
         self.populate_tab((tab_name,tab_value))
-
-    def determine_file_type(self, file):
-        ''' Determine and return the file type
-            @file - a (root, name, type) 3-tuple '''
-
-        # TODO - Check for image and video extensions
-
-        if file[2] == 'd':
-            return "Directory"
-        elif file[2] == 'f':
-            return "File"
-        else:
-            return "Unknown"
 
