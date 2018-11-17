@@ -82,6 +82,9 @@ class Player_GUI(object):
         # Create main window
         self.mw = self.create_main_window()
 
+        # Create a tab manager
+        self.notebook = ttk.Notebook(self.mw)
+
         # Display drives as tabs and get dictionary of all tabs with drives as keys
         self.tabs = self.display_drives()
 
@@ -107,11 +110,9 @@ class Player_GUI(object):
         # Dictionary of tabs
         tab_dict = OrderedDict()
 
-        # Create a tab manager
-        tabs = ttk.Notebook(self.mw)
-
-        # Callback for changing tabs
-        tabs.bind("<<NotebookTabChanged>>", self.tab_changed_callback)
+        # Callbacks for changing tabs
+        self.notebook.bind("<<NotebookTabChanged>>", self.tab_changed_callback)
+        self.notebook.bind("<Tab>", self.tab_pressed_callback)
 
         # Instantiate the drive manager
         drive_manager = Drive_Manager()
@@ -122,13 +123,13 @@ class Player_GUI(object):
         # Display drives as tabs
         for drive in drives:
             # Create a new tab
-            new_tab = ttk.Frame(tabs)
+            new_tab = ttk.Frame(self.notebook)
             # Add it to a dictionary
             tab_dict[drive] = new_tab
             # Add it to the main window
-            tabs.add(new_tab, text='      {}      '.format(drive))
+            self.notebook.add(new_tab, text='      {}      '.format(drive))
 
-        tabs.pack(expand=1, fill='both')
+        self.notebook.pack(expand=1, fill='both')
 
         return tab_dict
 
@@ -154,6 +155,12 @@ class Player_GUI(object):
 
         # Place the file viewer
         tree.show()
+
+    def tab_pressed_callback(self, event):
+        ''' Callback to run when the tab key is pressed '''
+
+        self.notebook.tab(self.notebook.select())
+
 
     def tab_changed_callback(self, event):
         ''' Callback to run when a tab is changed '''
