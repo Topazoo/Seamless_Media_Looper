@@ -73,7 +73,7 @@ class View_Tree(object):
 
         # TODO - Otherwise play the video
         else:
-            print "Playing " + item_vals[0] + item_vals[1]
+            print "Playing " + item_vals[1]
 
     def show(self):
         self.tree.pack(fill=BOTH, expand=1)
@@ -106,7 +106,10 @@ class Player_GUI(object):
         root.title("Media Player")
 
         # Maximize window
-        root.attributes('-zoomed', True)
+        if os.name == "nt":
+            root.state('zoomed')
+        elif os.name == "posix":
+            root.attributes('-zoomed', True)
 
         return root
 
