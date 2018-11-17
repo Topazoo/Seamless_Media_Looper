@@ -1,3 +1,4 @@
+import vlc
 import Tkinter as tk
 from PIL import ImageTk, Image
 
@@ -41,7 +42,6 @@ class Media_Player(object):
         # Load the image with tk
         raw_image = Image.open(path)
         raw_image = self.resize_image(raw_image, window.winfo_screenwidth(), window.winfo_screenheight())
-
         img = ImageTk.PhotoImage(raw_image)
 
         # Add the image to the window
@@ -59,3 +59,14 @@ class Media_Player(object):
 
         # Start the GUI
         window.mainloop()
+
+    def play_video(self, path):
+        ''' Play a video in fullscreen
+            @path - The path to the video '''
+
+        vlc_root = vlc.Instance()
+        player = vlc_root.media_player_new()
+        video = vlc_root.media_new(path)
+        video.get_mrl()
+        player.set_media(video)
+        player.play()
