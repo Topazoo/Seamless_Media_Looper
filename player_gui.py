@@ -2,6 +2,7 @@ from Tkinter import *
 import ttk
 import os
 from drive_manager import Drive_Manager
+from media_player import Media_Player
 from collections import OrderedDict
 
 class View_Tree(object):
@@ -73,7 +74,11 @@ class View_Tree(object):
 
         # TODO - Otherwise play the video
         else:
-            print "Playing " + item_vals[1]
+            media_player = Media_Player()
+            # Display image if selected
+            if item_vals[2] == "Image":
+                full_path = item_vals[0] + '\\' + item_vals[1]
+                media_player.display_image(full_path)
 
     def show(self):
         self.tree.pack(fill=BOTH, expand=1)
