@@ -34,9 +34,9 @@ $ source venv/bin/activate
 Clone this repository to a folder of your choice, navigate to the folder containing
 <i>driver.py</i> and run it.
 ```
-$ git clone https://github.com/Topazoo/Seamless_Media_Looper.git
-$ cd Seamless_Media_Looper
-$ python driver.py
+(venv) $ git clone https://github.com/Topazoo/Seamless_Media_Looper.git
+(venv) $ cd Seamless_Media_Looper
+(venv) $ python driver.py
 ```
 If all dependencies are installed correctly, the GUI will open.
 
