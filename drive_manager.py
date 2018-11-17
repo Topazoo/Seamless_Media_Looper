@@ -3,6 +3,9 @@ import os
 class Drive_Manager(object):
     ''' Removable drive manager '''
 
+    image_extensions = ['.jpg', '.jpeg', '.png']
+    movie_extensions = ['.mp4', '.mov']
+
     def __init__(self):
 
         # Detect connected drives
@@ -20,11 +23,12 @@ class Drive_Manager(object):
         #TODO - Raspbian drives
 
 
-    def get_path_contents(self, dir, content):
+    def get_path_contents(self, dir, content, media_only=False):
         ''' Get the contents of a directory
             @dir - The directory to map
             @content - A string: Either 'All', 'Dir', or 'File' depending on what type to retrieve
-                        'All' returns a tuple of directories and files '''
+                        'All' returns a tuple of directories and files
+            @media_only - True if only media and directories should be collected '''
 
         contents = []
 
@@ -33,12 +37,13 @@ class Drive_Manager(object):
             for root, dirs, files in os.walk(dir):
                 for d in dirs:
                     if d[0] != '.' and d[0] != '$':
-                        add_dir = (root, d, 'd')
+                        add_dir = (root, d, 'Directory')
                         contents.append(add_dir)
                 for f in files:
-                    add_file = (root, f, 'f')
-                    contents.append(add_file)
-
+                    f_type = self.determine_file_type(f)
+                    if not media_only or (media_only and f_type == "Image") or (media_only and f_type == "Video"):
+                        add_file = (root, f, f_type)
+                        contents.append(add_file)
                 break
 
         # Collect all top-level directories
@@ -46,7 +51,7 @@ class Drive_Manager(object):
             for root, dirs, files in os.walk(dir):
                 for d in dirs:
                     if d[0] != '.' and d[0] != '$':
-                        add_dir = (root, d, 'd')
+                        add_dir = (root, d, 'Directory')
                         contents.append(add_dir)
 
                 break
@@ -55,9 +60,35 @@ class Drive_Manager(object):
         if content == 'File':
             for root, dirs, files in os.walk(dir):
                 for f in files:
-                    add_file = (root, f, 'f')
-                    contents.append(add_file)
+                    f_type = self.determine_file_type(f)
+                    if not media_only or (media_only and f_type == "Image") or (media_only and f_type == "Video"):
+                        add_file = (root, f, f_type)
+                        contents.append(add_file)
 
                 break
 
         return contents
+
+    def determine_file_type(self, file_t):
+        ''' Determine and return the file type
+            @file_t - The file to determine type '''
+
+        # Find the index of the extension
+        ext_index = file_t.rfind('.')
+
+        # Handle no extension
+        if ext_index == -1:
+            return "File"
+
+        # Parse extension
+        ext = file_t[ext_index::]
+
+        # Check if photo
+        if ext in self.image_extensions:
+            return "Image"
+
+        # Check if video
+        if ext in self.movie_extensions:
+            return "Video"
+
+        return "File"

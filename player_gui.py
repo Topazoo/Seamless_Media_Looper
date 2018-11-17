@@ -21,6 +21,8 @@ class View_Tree(object):
 
         # Set event callback for double click
         self.tree.bind("<Double-1>", self.tree_double_click_callback)
+        # Set event callback for enter key press
+        self.tree.bind('<Return>', self.tree_double_click_callback)
 
     def populate_tree(self, contents, element=''):
         ''' Populate the file viewer
@@ -28,14 +30,12 @@ class View_Tree(object):
             @contents - A list of contents to populate the viewer with '''
 
         for content in contents:
-            # Determine file type
-            f_type = self.determine_file_type(content)
             # Insert all contents
             insert = content[0]
             if element == '':
                 insert += '\\'
 
-            content_str = '"{}" "{}" {}'.format(insert, content[1], f_type)
+            content_str = '"{}" "{}" "{}"'.format(insert, content[1], content[2])
 
             self.tree.insert(element, 'end', text=content[0],
                              values=content_str)
@@ -61,7 +61,7 @@ class View_Tree(object):
             new_path = item_text + "\\" + item_vals[1]
 
             # Get contents of the drive referred to by the tab
-            contents = drive_manager.get_path_contents(new_path, 'All')
+            contents = drive_manager.get_path_contents(new_path, 'All', media_only=True)
 
             self.populate_tree(contents, item)
 
@@ -69,21 +69,11 @@ class View_Tree(object):
         elif item_vals[2] == 'File':
             print "Playing " + item_vals[0] + item_vals[1]
 
-    def determine_file_type(self, file):
-        ''' Determine and return the file type
-            @file - a (root, name, type) 3-tuple '''
-
-        # TODO - Check for image and video extensions
-
-        if file[2] == 'd':
-            return "Directory"
-        elif file[2] == 'f':
-            return "File"
-        else:
-            return "Unknown"
-
     def show(self):
         self.tree.pack(fill=BOTH, expand=1)
+        self.tree.selection_set(self.tree.get_children()[0])
+        self.tree.focus(self.tree.get_children()[0])
+        self.tree.focus_set()
 
 class Player_GUI(object):
     ''' Media player GUI '''
@@ -157,7 +147,7 @@ class Player_GUI(object):
         tree = View_Tree(tab[1])
 
         # Get contents of the drive referred to by the tab
-        contents = drive_manager.get_path_contents(tab[0], 'All')
+        contents = drive_manager.get_path_contents(tab[0], 'All', media_only=True)
 
         # Populate the tree
         tree.populate_tree(contents)
