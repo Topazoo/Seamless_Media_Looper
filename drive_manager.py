@@ -33,8 +33,6 @@ class Drive_Manager(object):
 
             return drives
 
-
-
         else:
             raise OSError('Sorry, this application is incompatible with the ' + os.name + ' operating system.')
 

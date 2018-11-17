@@ -79,9 +79,9 @@ class View_Tree(object):
             # Display image if selected
             if item_vals[2] == "Image":
                 if os.name == 'nt':
-                    full_path = item_vals[0] + '\\' + item_vals[1]
+                    full_path = item_text + '\\' + item_vals[1]
                 elif os.name == 'posix':
-                    full_path = item_vals[0] + '/' + item_vals[1]
+                    full_path = item_text + '/' + item_vals[1]
 
                 media_player.display_image(full_path)
 
