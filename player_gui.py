@@ -75,9 +75,14 @@ class View_Tree(object):
         # TODO - Otherwise play the video
         else:
             media_player = Media_Player()
+
             # Display image if selected
             if item_vals[2] == "Image":
-                full_path = item_vals[0] + '\\' + item_vals[1]
+                if os.name == 'nt':
+                    full_path = item_vals[0] + '\\' + item_vals[1]
+                elif os.name == 'posix':
+                    full_path = item_vals[0] + '/' + item_vals[1]
+
                 media_player.display_image(full_path)
 
     def show(self):
