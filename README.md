@@ -20,7 +20,9 @@ Note: This application is Linux and Windows compatible, but far more robust medi
 Ensure the following are installed on the machine you are running the application on:
 - Python 2.7 with pip
 - virtualenv for Python 2.7
-- vlc (sudo apt-get vlc)
+- vlc
+    - Windows: https://get.videolan.org/vlc/3.0.4/win32/vlc-3.0.4-win32.exe
+    - Linux: ``` $ sudo apt-get install vlc ```
 
 Create a virtualenv and install the requirements from <i>requirements.txt</i> with pip
 ```
