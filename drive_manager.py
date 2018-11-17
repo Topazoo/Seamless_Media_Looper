@@ -20,7 +20,23 @@ class Drive_Manager(object):
             drives = ['%s:\\' % drive for drive in possible_drives if os.path.exists('%s:' % drive)]
             return drives
 
-        #TODO - Raspbian drives
+        elif os.name == 'posix':
+            drives = []
+            # Get all users
+            paths = self.get_path_contents('/media/', 'Dir')
+            # Get all devices
+            for path in paths:
+                full_path = path[0] + path[1] + '/'
+                path_drives = self.get_path_contents(full_path, 'Dir')
+                for drive in path_drives:
+                    drives.append(drive[0] + drive[1])
+
+            return drives
+
+
+
+        else:
+            raise OSError('Sorry, this application is incompatible with the ' + os.name + ' operating system.')
 
 
     def get_path_contents(self, dir, content, media_only=False):

@@ -1,5 +1,6 @@
 from Tkinter import *
 import ttk
+import os
 from drive_manager import Drive_Manager
 from collections import OrderedDict
 
@@ -32,8 +33,10 @@ class View_Tree(object):
         for content in contents:
             # Insert all contents
             insert = content[0]
-            if element == '':
+            if element == '' and os.name == "nt":
                 insert += '\\'
+            elif element =='' and os.name == "posix":
+                insert += '/'
 
             content_str = '"{}" "{}" "{}"'.format(insert, content[1], content[2])
 
@@ -58,7 +61,10 @@ class View_Tree(object):
             if len(children) > 0:
                 self.tree.delete(children)
 
-            new_path = item_text + "\\" + item_vals[1]
+            if os.name == "nt":
+                new_path = item_text + "\\" + item_vals[1]
+            elif os.name == "posix":
+                new_path = item_text + "/" + item_vals[1]
 
             # Get contents of the drive referred to by the tab
             contents = drive_manager.get_path_contents(new_path, 'All', media_only=True)
@@ -66,7 +72,7 @@ class View_Tree(object):
             self.populate_tree(contents, item)
 
         # TODO - Otherwise play the video
-        elif item_vals[2] == 'File':
+        else:
             print "Playing " + item_vals[0] + item_vals[1]
 
     def show(self):
@@ -100,7 +106,7 @@ class Player_GUI(object):
         root.title("Media Player")
 
         # Maximize window
-        root.state('zoomed')
+        root.attributes('-zoomed', True)
 
         return root
 
