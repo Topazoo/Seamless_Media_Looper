@@ -72,7 +72,7 @@ class View_Tree(object):
 
             self.populate_tree(contents, item)
 
-        # TODO - Otherwise play the video
+        # Otherwise display media
         else:
             media_player = Media_Player()
             if os.name == 'nt':

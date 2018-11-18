@@ -1,6 +1,64 @@
 import vlc
+import os
 import Tkinter as tk
 from PIL import ImageTk, Image
+
+class Video_Window(object):
+    ''' Window to display videos '''
+
+    def __init__(self, path):
+        '''@path - The path of the file to load '''
+
+        # Instantiate video player
+        vlc_root = vlc.Instance()
+        self.player = vlc_root.media_player_new()
+
+        # Load video
+        video = vlc_root.media_new(path)
+        video.get_mrl()
+        self.player.set_media(video)
+
+    def play(self, loop=False):
+        ''' Open the video player and play video
+            @loop - True if player should loop the video '''
+
+        # Create a fullscreen video window
+        window = tk.Toplevel()
+        window.wm_attributes('-fullscreen', 'true')
+
+        # Add the video to the window
+        video_label = tk.Label(window)
+        video_label.configure(bg='black')
+
+        # The Pack geometry manager packs widgets in rows or columns.
+        video_label.pack(side="bottom", fill="both", expand="yes")
+
+        # Set focus on the window
+        window.focus_set()
+
+        # Bind escape key to quit the window
+        window.bind("<Escape>", self.video_exit_callback)
+
+        # Assign to window
+        if os.name == "nt":
+            self.player.set_hwnd(video_label.winfo_id())
+        elif os.name == "posix":
+            self.player.set_xwindow(video_label.winfo_id())
+
+        # Play video
+        self.player.play()
+
+        # Start the GUI
+        window.mainloop()
+
+    def video_exit_callback(self, event):
+        ''' Callback when window is destroyed '''
+
+        # Stop the playing video
+        self.player.stop()
+
+        # Quit the window
+        event.widget.destroy()
 
 class Media_Player(object):
     ''' Media player '''
@@ -60,13 +118,15 @@ class Media_Player(object):
         # Start the GUI
         window.mainloop()
 
-    def play_video(self, path):
+    def play_video(self, path, loop=True):
         ''' Play a video in fullscreen
-            @path - The path to the video '''
+            @path - The path to the video
+            @loop - Loop video if True'''
 
-        vlc_root = vlc.Instance()
-        player = vlc_root.media_player_new()
-        video = vlc_root.media_new(path)
-        video.get_mrl()
-        player.set_media(video)
-        player.play()
+        # Create the wideo window
+        window = Video_Window(path)
+
+        # Play media
+        window.play(loop)
+
+
