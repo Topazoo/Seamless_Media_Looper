@@ -1,67 +1,61 @@
 import vlc
 import os
+import time
 import Tkinter as tk
 from PIL import ImageTk, Image
 
-class Video_Window(object):
+class VLC_Player(object):
     ''' Window to display videos '''
 
-    def __init__(self, path):
-        '''@path - The path of the file to load '''
+    def __init__(self, path, video_label_id):
+        ''' @path - The path of the file to load
+            @video_label_id - The id of the window to attach to
+            @loop - True if the media should be looped'''
+
+        self.path = path
 
         # Instantiate video player
-        vlc_root = vlc.Instance()
-        self.player = vlc_root.media_player_new()
-
-        # Load video
-        video = vlc_root.media_new(path)
-        video.get_mrl()
-        self.player.set_media(video)
-
-    def play(self, loop=False):
-        ''' Open the video player and play video
-            @loop - True if player should loop the video '''
-
-        # Create a fullscreen video window
-        window = tk.Toplevel()
-        window.wm_attributes('-fullscreen', 'true')
-
-        # Add the video to the window
-        video_label = tk.Label(window)
-        video_label.configure(bg='black')
-
-        # The Pack geometry manager packs widgets in rows or columns.
-        video_label.pack(side="bottom", fill="both", expand="yes")
-
-        # Set focus on the window
-        window.focus_set()
-
-        # Bind escape key to quit the window
-        window.bind("<Escape>", self.video_exit_callback)
+        self.vlc_root = vlc.Instance()
+        self.player = self.vlc_root.media_player_new()
 
         # Assign to window
         if os.name == "nt":
-            self.player.set_hwnd(video_label.winfo_id())
+            self.player.set_hwnd(video_label_id)
         elif os.name == "posix":
-            self.player.set_xwindow(video_label.winfo_id())
+            self.player.set_xwindow(video_label_id)
 
-        # Play video
+        self.load_video(path)
+
+    def load_video(self, path):
+        # Load video
+        video = self.vlc_root.media_new(path)
+        self.player.set_media(video)
+
+    def play(self, loop):
+        ''' Play video '''
+
+        if loop:
+            # Create and bind events
+            player_events = self.player.event_manager()
+            player_events.event_attach(vlc.EventType.MediaPlayerTimeChanged, self.video_playing_callback)
+
         self.player.play()
 
-        # Start the GUI
-        window.mainloop()
+    def stop(self):
+        ''' Stop video '''
 
-    def video_exit_callback(self, event):
-        ''' Callback when window is destroyed '''
-
-        # Stop the playing video
         self.player.stop()
 
-        # Quit the window
-        event.widget.destroy()
+    def video_playing_callback(self, event):
+        ''' Reset position if within 1/5 of a second of the end '''
 
-class Media_Player(object):
-    ''' Media player '''
+        diff = self.player.get_length() - self.player.get_time()
+
+        if diff <= 200 or self.player.get_time() >= self.player.get_length():
+            self.player.set_position(0)
+
+class Image_Viewer(object):
+    ''' Image viewer'''
 
     def resize_image(self, raw_image, base_width, base_height):
         ''' Resize an image to fit a width and height maintaining aspect-ratio
@@ -118,15 +112,49 @@ class Media_Player(object):
         # Start the GUI
         window.mainloop()
 
-    def play_video(self, path, loop=True):
-        ''' Play a video in fullscreen
-            @path - The path to the video
-            @loop - Loop video if True'''
+class Video_Player(object):
+    def __init__(self, path):
 
-        # Create the wideo window
-        window = Video_Window(path)
+        # Create the video window
+        self.window_id = self.create_video_window()
+        self.vlc_player = VLC_Player(path, self.window_id)
+
+    def create_video_window(self):
+        ''' Create the player window in the GUI '''
+
+        # Create a fullscreen video window
+        window = tk.Toplevel()
+        window.wm_attributes('-fullscreen', 'true')
+
+        # Add the video to the window
+        video_label = tk.Label(window)
+        video_label.configure(bg='black')
+
+        # The Pack geometry manager packs widgets in rows or columns.
+        video_label.pack(side="bottom", fill="both", expand="yes")
+
+        # Set focus on the window
+        window.focus_set()
+
+        # Bind escape key to quit the window
+        window.bind("<Escape>", self.video_exit_callback)
+
+        video_label_id = video_label.winfo_id()
+
+        return video_label_id
+
+    def play_video(self, loop=False):
+        ''' Play a video in fullscreen
+            @loop - True if media should be looped '''
 
         # Play media
-        window.play(loop)
+        self.vlc_player.play(loop)
 
+    def video_exit_callback(self, event):
+        ''' Callback when window is destroyed '''
 
+        # Stop the playing video
+        self.vlc_player.stop()
+
+        # Quit the window
+        event.widget.destroy()
