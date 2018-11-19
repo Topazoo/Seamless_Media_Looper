@@ -23,8 +23,12 @@ class View_Tree(object):
 
         # Set event callback for double click
         self.tree.bind("<Double-1>", self.tree_double_click_callback)
-        # Set event callback for enter key press
+        # Set event callback for Enter key press
         self.tree.bind('<Return>', self.tree_double_click_callback)
+        # Set event callback for Alt + double click
+        self.tree.bind("<Alt-Double-1>", self.tree_control_click_callback)
+        # Set event callback for Enter + double click
+        self.tree.bind("<Alt-Return>", self.tree_control_click_callback)
 
     def populate_tree(self, contents, element=''):
         ''' Populate the file viewer
@@ -86,6 +90,49 @@ class View_Tree(object):
             if item_vals[2] == "Video":
                 video_player = Video_Player(full_path)
                 video_player.play_video(loop=True)
+
+    def tree_control_click_callback(self, event):
+        ''' Callback to run when a treeview button is clicked '''
+
+        drive_manager = Drive_Manager()
+
+        # Get ID of selection
+        selection = self.tree.selection()
+        item = selection[0]
+        item_vals = self.tree.item(item, "value")
+        item_text = self.tree.item(item, "text")
+
+        # If it's a directory
+        if item_vals[2] == 'Directory':
+            # Delete children if they exist
+            children = self.tree.get_children(item)
+            if len(children) > 0:
+                self.tree.delete(children)
+
+            if os.name == "nt":
+                new_path = item_text + "\\" + item_vals[1]
+            elif os.name == "posix":
+                new_path = item_text + "/" + item_vals[1]
+
+            # Get contents of the drive referred to by the tab
+            contents = drive_manager.get_path_contents(new_path, 'All', media_only=True)
+
+            self.populate_tree(contents, item)
+
+        # Otherwise display media
+        else:
+            if os.name == 'nt':
+                full_path = item_text + '\\' + item_vals[1]
+            elif os.name == 'posix':
+                full_path = item_text + '/' + item_vals[1]
+
+            # Display image if selected
+            if item_vals[2] == "Image":
+                image_viewer = Image_Viewer()
+                image_viewer.display_image(full_path)
+            if item_vals[2] == "Video":
+                video_player = Video_Player(full_path)
+                video_player.play_video(loop=False)
 
     def show(self):
         self.tree.pack(fill=BOTH, expand=1)

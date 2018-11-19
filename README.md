@@ -47,4 +47,6 @@ displayed.
 - Double click or press Enter on any directory to display its contents.
 - Double click or press Enter on any image file to display it in fullscreen.
 - Double click or press Enter on any video file to loop it in fullscreen.
+- Alt + double click or press Alt + Enter on any video to play it in fullscreen. 
 - Press Escape to exit any media being displayed.
+- Press Alt + F4 to exit the program.
