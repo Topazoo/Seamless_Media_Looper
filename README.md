@@ -8,8 +8,8 @@
 ## Background:
 A friend of mine who works in the entertainment industry told me he was thinking
 about using a Raspberry Pi to loop media for the scenes he was shooting. We couldn't find
-any good pre-built programs to display images or loop media so I decided to build an 
-application with an easy to use GUI to do just that. 
+any good pre-built programs to display images or loop media so I decided to build the 
+application myself with an easy to use GUI. 
 
 <b>This application can be installed on a Raspberry Pi to seamlessly loop videos and display images.</b>
 
