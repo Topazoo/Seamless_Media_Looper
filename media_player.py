@@ -8,15 +8,13 @@ class VLC_Player(object):
 
     def __init__(self, path, video_label_id):
         ''' @path - The path of the file to load
-            @video_label_id - The id of the window to attach to '''
+            @video_label_id - The id of the window to attach to
+            @loop - True if the media should be looped'''
+
+        self.path = path
 
         # Instantiate video player
         self.vlc_root = vlc.Instance()
-        # Instantiate a playlist player
-        self.list_player = self.vlc_root.media_list_player_new()
-        # Instantiate a playlist
-        self.media_list = self.vlc_root.media_list_new()
-        # Instantiate a media player
         self.player = self.vlc_root.media_player_new()
 
         # Assign to window
@@ -25,35 +23,35 @@ class VLC_Player(object):
         elif os.name == "posix":
             self.player.set_xwindow(video_label_id)
 
-        # Load the video
         self.load_video(path)
 
     def load_video(self, path):
-        ''' Load a video from a path
-            @path - The path to load the video from'''
-
         # Load video
         video = self.vlc_root.media_new(path)
-        # Add to playlist
-        self.media_list.add_media(video)
-        # Add playlist to player
-        self.list_player.set_media_list(self.media_list)
-        # Assign player to playlist
-        self.list_player.set_media_player(self.player)
+        self.player.set_media(video)
 
     def play(self, loop):
-        ''' Play video
-            @loop - True if video should be looped '''
+        ''' Play video '''
 
         if loop:
-            self.list_player.set_playback_mode(vlc.PlaybackMode.loop)
+            # Create and bind events
+            player_events = self.player.event_manager()
+            player_events.event_attach(vlc.EventType.MediaPlayerTimeChanged, self.video_playing_callback)
 
-        self.list_player.play()
+        self.player.play()
 
     def stop(self):
         ''' Stop video '''
 
         self.player.stop()
+
+    def video_playing_callback(self, event):
+        ''' Reset position if within 1/5 of a second of the end '''
+
+        diff = self.player.get_length() - self.player.get_time()
+
+        if diff <= 200 or self.player.get_time() >= self.player.get_length():
+            self.player.set_position(0)
 
 class Image_Viewer(object):
     ''' Image viewer'''
