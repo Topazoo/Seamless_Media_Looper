@@ -11,7 +11,7 @@ about using a Raspberry Pi to loop media for the scenes he was shooting. We coul
 any good pre-built programs to display images or loop media so I decided to build the 
 application myself with an easy to use GUI. 
 
-<b>This application can be installed on a Raspberry Pi to seamlessly loop videos and display images.</b>
+<b>This application can be installed on a Raspberry Pi running Raspbian to seamlessly loop videos and display images.</b>
 
 Note: This application is Linux and Windows compatible, but far more robust media applications exist.
 
@@ -34,8 +34,8 @@ $ source venv/bin/activate
 Clone this repository to a folder of your choice, navigate to the folder containing
 <i>driver.py</i> and run it.
 ```
-(venv) $ git clone https://github.com/Topazoo/Seamless_Media_Looper.git
-(venv) $ cd Seamless_Media_Looper
+(venv) $ git clone https://github.com/Topazoo/Seamless_Media_Player.git
+(venv) $ cd Seamless_Media_Player
 (venv) $ python driver.py
 ```
 If all dependencies are installed correctly, the GUI will open.
